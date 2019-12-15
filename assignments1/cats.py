@@ -142,7 +142,7 @@ class Cat_Trainer:
             accuracy = self.accuracy(self.dataset)
             
             if epoch % 10 == 0:
-                print ('>epoch=%d,  accuracy=%.3f' % (epoch, accuracy))
+                print ('>epoch=%d,  accuracy=%.3f' % (epoch+1,lr, accuracy))
             costs.append(J)
             accuracies.append(accuracy)
             
@@ -150,15 +150,15 @@ class Cat_Trainer:
             
         print("training complete")
         print("final accuracy: %.3f" % (self.accuracy(self.dataset)))
-        costs = list(map(lambda t: np.mean(t),[np.array(costs)[i-10:i+11]for i in range (1, len(costs)-10)]))
-        accuracies = list(map(lambda t: np.mean(t),[np.array(accuracies)[i-10:i+11]for i in range (1, len(accuracies)-10)]))
+        costs = list(map(lambda t: np.mean(t),[np.array(costs)[i-10:i+11]for i in range (1, len(costs)+10)]))
+        accuracies = list(map(lambda t: np.mean(t),[np.array(accuracies)[i-10:i+11]for i in range (1, len(accuracies)+10)]))
         
         return (costs, accuracies)
 
     
 class Cat_Data:
 
-    def __init__(self, relative_path='/Users/haruna/Desktop/AI_1/', data_file_name='cat_data.pkl'):
+    def __init__(self, relative_path='/Users/haruna/Desktop/AI_1/assignment1/', data_file_name='cat_data.pkl'):
         '''
         initialize self.index; load and preprocess data; shuffle the iterator
         '''
@@ -184,8 +184,7 @@ class Cat_Data:
         self.index += 1
         
         if self.index == len (self.samples):
-            self.index = -1
-            raise StopInteration
+            raise StopIteration
             
         return self.samples[self.index][0],self.samples[self.index][1]
 
@@ -194,19 +193,25 @@ class Cat_Data:
         shuffle the data iterator
         '''
         random.shuffle(self.samples)
+        
+    def standardize (self,rgb_images):
+        
+        mean = np.mean(rgb_images, axis = (1,2), keepdims= True)
+        std = np.std(rgb_images, axis = (1,2), keepdims= True)
+        return (rgb_images - mean)/std
+    
 
 def main():
 
     data = Cat_Data()
-    model = Cat_Model()  # specify the necessary arguments
+    model = Cat_Model(activation = sigmoid)  # specify the necessary arguments
     trainer = Cat_Trainer(data, model)
-    trainer.train() # experiment with learning rate and number of epochs
+    costs, accuracies = trainer.train(0.01, 500) # experiment with learning rate and number of epochs
     model.save_model()
 
 
 if __name__ == '__main__':
 
-    path = '/Users/haruna/Desktop/AI_1/assignment1/'
-    filename ='cat_data.pkl'
+
     
     main()
