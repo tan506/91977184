@@ -100,4 +100,3 @@ sonar_model1=Sonar.load_model()
 print("Loaded Model prediction:",sonar_model1.predict(v))
                 
 
-
